@@ -48,7 +48,7 @@ def capsolver(site_key):
             print("Solve failed! response:", res.text)
             return
 class VietaBank:
-    def __init__(self):
+    def __init__(self, username, password, account_number):
         self.keyanticaptcha = "b8246038ce1540888c4314a6c043dcae"
         self.cookies = RequestsCookieJar()
         self.session = requests.Session()
@@ -56,6 +56,9 @@ class VietaBank:
         self.url_post = ''
         self.url_accountactivityprepare = ''
         self._ss = ''
+        self.password = password
+        self.username = username
+        self.account_number = account_number
         self.is_login = False
     def check_title(self,html_content):
         pattern = r'<title>(.*?)</title>'
@@ -105,14 +108,14 @@ class VietaBank:
             return (extracted_data)
         else:
             return None
-    def login(self, username, password):
+    def login(self):
         url = "https://ebanking.vietabank.com.vn/"
         payload = {}
         headers = {}
         response = self.session.get(url, headers=headers, data=payload)
 
         url = "https://ebanking.vietabank.com.vn/"
-        payload = 'ipify=0.0.0.0&disable-pwd-mgr-1=disable-pwd-mgr-1&disable-pwd-mgr-2=disable-pwd-mgr-2&disable-pwd-mgr-3=disable-pwd-mgr-3&askRename=&askRenameMsg=&actionFlg=&idChannelUser='+str(username)+'&password='+urllib.parse.quote(str(password))
+        payload = 'ipify=0.0.0.0&disable-pwd-mgr-1=disable-pwd-mgr-1&disable-pwd-mgr-2=disable-pwd-mgr-2&disable-pwd-mgr-3=disable-pwd-mgr-3&askRename=&askRenameMsg=&actionFlg=&idChannelUser='+str(self.username)+'&password='+urllib.parse.quote(str(self.password))
         headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.100.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -418,18 +421,20 @@ class VietaBank:
         
 
     
-vietabank = VietaBank()
+
 username = "0348186379"
 password = "Huy2929@"
 fromDate='12/02/2024'
 toDate = '21/02/2024'
 account_number = "00366038"
+
+vietabank = VietaBank(username,password,account_number)
 # username = "0362245196"
 # password = "Nguyen157#"
 # fromDate='29/02/2024'
 # toDate = '30/03/2024'
 # account_number = "00509294"
-# session_raw = vietabank.login(username, password)
+# session_raw = vietabank.login()
 # print(session_raw)
 
 
