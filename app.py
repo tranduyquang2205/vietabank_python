@@ -5,7 +5,6 @@ from vietabank import VietaBank
 import sys
 import traceback
 from api_response import APIResponse
-vietabank = VietaBank()
 app = FastAPI()
 @app.get("/")
 def read_root():
@@ -18,6 +17,7 @@ class LoginDetails(BaseModel):
 @app.post('/login', tags=["login"])
 def login_api(input: LoginDetails):
         try:
+                vietabank = VietaBank(input.username,input.password,input.account_number)
                 response = vietabank.login(input.username, input.password)
                 return APIResponse.json_format(response)
         except Exception as e:
@@ -29,6 +29,7 @@ def login_api(input: LoginDetails):
 @app.post('/get_balance', tags=["get_balance"])
 def get_balance_api(input: LoginDetails):
         try:
+                vietabank = VietaBank(input.username,input.password,input.account_number)    
                 response = vietabank.get_balance(input.account_number)
                 return APIResponse.json_format(response)
         except Exception as e:
@@ -46,6 +47,7 @@ class Transactions(BaseModel):
 @app.post('/get_transactions', tags=["get_transactions"])
 def get_transactions_api(input: Transactions):
         try:
+                vietabank = VietaBank(input.username,input.password,input.account_number)
                 response = vietabank.get_transactions(input.account_number,input.from_date,input.to_date)
                 return APIResponse.json_format(response)
         except Exception as e:
