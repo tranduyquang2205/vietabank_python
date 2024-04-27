@@ -85,6 +85,10 @@ class VietaBank:
         pattern = r'var transHis = (.*)];'
         match = re.search(pattern, html_content)
         return match.group(1)+']' if match else []
+    def extract_account_name(self,html_content):
+        pattern = r'<input id="flddestaccountname" name="rqBene\.beneficiaryDTO\[0\]\.paymentTemplateDTO\[0\]\.domesticImReqDataDTO\.destAccount\.accountDesc" class="form-control eng" title="T&ecirc;n chủ thẻ" data-toggle="tooltip" data-placement="top" readonly="readonly" type="text" value="(([A-Z]|\s)*)"/>'
+        match = re.search(pattern, html_content)
+        return match.group(1) if match else None
     def extract_account_number(self,html_content):
         pattern = r'<a href="/accountdetailsview\.html\?pid=\w+&fcid=asmp">(\d+)</a>\s*-\s*.*?<td.*?>([\d,.]+)</td>'
 
@@ -255,15 +259,16 @@ class VietaBank:
         'sec-ch-ua-platform': '"Windows"'
         }
         response = self.session.get(url, headers=headers, data=payload)
-        data_sitekey = self.extract_data_sitekey(response.text)
+        # data_sitekey = self.extract_data_sitekey(response.text)
         # reCaptcha_response = reCaptchaV3('https://www.google.com/recaptcha/api2/anchor?ar=1&k='+data_sitekey+'&co=aHR0cHM6Ly9lYmFua2luZy52aWV0YWJhbmsuY29tLnZuOjQ0Mw..&hl=en&v=moV1mTgQ6S91nuTnmll4Y9yf&size=invisible&sa=submit')
         # solver.set_website_key(data_sitekey)
         # reCaptcha_response = solver.solve_and_return_solution()
-
-        reCaptcha_response = capsolver(data_sitekey)
-        if not reCaptcha_response:
-            return   {"success": False,"code": 406,"message": "Error bypass reCaptchaV3!"}
+        # print(response.text)
+        # reCaptcha_response = capsolver(data_sitekey)
+        # if not reCaptcha_response:
+        #     return   {"success": False,"code": 406,"message": "Error bypass reCaptchaV3!"}
         data_cId = self.extract_data_cId(response.text)
+        
         payload = {
         'refid': '',
         'rqTrans.account.nbrAccount': str(account_number),
@@ -274,7 +279,7 @@ class VietaBank:
         'rqFromAmount': '',
         'rqToAmount': '',
         'rqTrans.toaccount.nbrAccount': '',
-        'g-recaptcha-response': reCaptcha_response,
+        # 'g-recaptcha-response': reCaptcha_response,
         'rqTrans.page.pageNo': '1',
         'rsTrans.totalPages': '0',
         'reporttype': '',
@@ -282,7 +287,8 @@ class VietaBank:
         'ipify':'',
         '_ls': '1',
         '_ss': '1',
-        'data_cId': str(data_cId)}
+        'data_cId': str(data_cId)
+        }
         files=[
 
         ]
@@ -311,14 +317,113 @@ class VietaBank:
                 'data':{
                     'transactions':transactions,
         }}
+    def mapping_bank_code(self,bank_name):
+        with open('banks.json','r', encoding='utf-8') as f:
+            data = json.load(f)
+        for bank in data['data']:
+            if bank['shortName'].lower() == bank_name.lower():
+                return {
+                    'bin': bank['bin'],
+                    'name': bank['name'],
+                    'code': bank['code']
+                    }
+        return None
+    def get_bank_name(self, ben_account_number, bank_name):
+        if not self.is_login:
+            login = self.login()
+            if not login['success']:
+                return login
+        url = "https://ebanking.vietabank.com.vn/domesticimmetransfer.html"
+
+        payload = {}
+        headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'max-age=0',
+        'Connection': 'keep-alive',
+        'Referer': 'https://ebanking.vietabank.com.vn/fundtransfer.html',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+        'sec-ch-ua': '"Chromium";v="124", "Microsoft Edge";v="124", "Not-A.Brand";v="99"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+        }
+
+        response =  self.session.get(url, headers=headers, data=payload)
+        data_cId = self.extract_data_cId(response.text)
+        bank_info = self.mapping_bank_code(bank_name)
+        
+        url = "https://ebanking.vietabank.com.vn/domesticimmetransfer.html"
+    
+        payload = {'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].idTemplate': '0',
+        'sidata.si_type': 'TN',
+        'sidata.next_exec_date': '',
+        'sidata.executionFrequency': '1',
+        'sidata.exec_days': '0',
+        'sidata.exec_mths': '0',
+        'sidata.exec_yrs': '0',
+        'sidata.first_exec_date': '',
+        'sidata.final_exec_date': '',
+        'feeamt': '0.0',
+        'vat': '0.0',
+        'feeMin': '0.0',
+        'feeMax': '0.0',
+        'feePercent': '0.0',
+        'cardInfo': '',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].domesticImReqDataDTO.beneficiaryBankDetails[0].beneficiaryCodeType': 'ATA',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].domesticImReqDataDTO.beneficiaryBankDetails[0].swiftCode': bank_info['bin'],
+        'destbankname2': bank_info['name'] + ' ('+bank_info['code']+')',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].domesticImReqDataDTO.destAccount.nbrAccount': ben_account_number,
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].domesticImReqDataDTO.destAccount.accountDesc': '',
+        'destbankname': '',
+        'transferamt': '',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].domesticImReqDataDTO.narrative': '',
+        '__templateName': '',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].templateName': '',
+        '__templatelevel': 'P',
+        'rqBene.beneficiaryDTO[0].paymentTemplateDTO[0].typeTxn': '',
+        'flgAction': 'getCardInfo',
+        'ipify': '',
+        '_ls': '1',
+        '_ss': '1',
+        'data_cId': str(data_cId)}
+        files=[
+
+        ]
+        headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'max-age=0',
+        'Connection': 'keep-alive',
+        'Origin': 'https://ebanking.vietabank.com.vn',
+        'Referer': 'https://ebanking.vietabank.com.vn/domesticimmetransfer.html',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+        'sec-ch-ua': '"Chromium";v="124", "Microsoft Edge";v="124", "Not-A.Brand";v="99"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+        }
+
+        response = self.session.post(url, headers=headers, data=payload,files=files)
+        account_name = self.extract_account_name(response.text)
+        return account_name
+        
 
     
-# vietabank = VietaBank()
-# username = "0348186379"
-# password = "Huy2929@"
-# fromDate='12/02/2024'
-# toDate = '21/02/2024'
-# account_number = "00366038"
+vietabank = VietaBank()
+username = "0348186379"
+password = "Huy2929@"
+fromDate='12/02/2024'
+toDate = '21/02/2024'
+account_number = "00366038"
 # username = "0362245196"
 # password = "Nguyen157#"
 # fromDate='29/02/2024'
@@ -326,6 +431,8 @@ class VietaBank:
 # account_number = "00509294"
 # session_raw = vietabank.login(username, password)
 # print(session_raw)
+
+
 
 # accounts_list = vietabank.get_accounts_list()
 # print(accounts_list)
@@ -335,3 +442,6 @@ class VietaBank:
 
 # history = vietabank.get_transactions(account_number,fromDate,toDate)
 # print(history)
+
+# bank_name = vietabank.get_bank_name("0621000456871", "Vietcombank")
+# print(bank_name)
