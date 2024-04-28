@@ -429,15 +429,15 @@ toDate = '21/02/2024'
 account_number = "00366038"
 
 vietabank = VietaBank(username,password,account_number)
+
 # username = "0362245196"
 # password = "Nguyen157#"
 # fromDate='29/02/2024'
 # toDate = '30/03/2024'
 # account_number = "00509294"
+
 # session_raw = vietabank.login()
 # print(session_raw)
-
-
 
 # accounts_list = vietabank.get_accounts_list()
 # print(accounts_list)
