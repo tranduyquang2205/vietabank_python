@@ -20,7 +20,7 @@ class LoginDetails(BaseModel):
 def login_api(input: LoginDetails):
         try:
                 vietabank = VietaBank(input.username,input.password,input.account_number)
-                response = vietabank.login(input.username, input.password)
+                response = vietabank.login()
                 return APIResponse.json_format(response)
         except Exception as e:
             response = str(e)
