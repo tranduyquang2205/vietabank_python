@@ -262,64 +262,115 @@ class VietaBank:
         'sec-ch-ua-platform': '"Windows"'
         }
         response = self.session.get(url, headers=headers, data=payload)
-        # data_sitekey = self.extract_data_sitekey(response.text)
+        data_sitekey = self.extract_data_sitekey(response.text)
         # reCaptcha_response = reCaptchaV3('https://www.google.com/recaptcha/api2/anchor?ar=1&k='+data_sitekey+'&co=aHR0cHM6Ly9lYmFua2luZy52aWV0YWJhbmsuY29tLnZuOjQ0Mw..&hl=en&v=moV1mTgQ6S91nuTnmll4Y9yf&size=invisible&sa=submit')
         # solver.set_website_key(data_sitekey)
         # reCaptcha_response = solver.solve_and_return_solution()
         # print(response.text)
-        # reCaptcha_response = capsolver(data_sitekey)
-        # if not reCaptcha_response:
-        #     return   {"success": False,"code": 406,"message": "Error bypass reCaptchaV3!"}
-        data_cId = self.extract_data_cId(response.text)
-        
-        payload = {
-        'refid': '',
-        'rqTrans.account.nbrAccount': str(account_number),
-        'rqTrans.searchBy': '1',
-        'rqTrans.searchTxnType': '0',
-        'rqFromDate': fromDate,
-        'rqToDate': toDate,
-        'rqFromAmount': '',
-        'rqToAmount': '',
-        'rqTrans.toaccount.nbrAccount': '',
-        # 'g-recaptcha-response': reCaptcha_response,
-        'rqTrans.page.pageNo': '1',
-        'rsTrans.totalPages': '0',
-        'reporttype': '',
-        'flgAction': 'find',
-        'ipify':'',
-        '_ls': '1',
-        '_ss': '1',
-        'data_cId': str(data_cId)
-        }
-        files=[
+        if data_sitekey:
+            reCaptcha_response = capsolver(data_sitekey)
+            if not reCaptcha_response:
+                return   {"success": False,"code": 406,"message": "Error bypass reCaptchaV3!"}
+            data_cId = self.extract_data_cId(response.text)
+            
+            payload = {
+            'refid': '',
+            'rqTrans.account.nbrAccount': str(account_number),
+            'rqTrans.searchBy': '1',
+            'rqTrans.searchTxnType': '0',
+            'rqFromDate': fromDate,
+            'rqToDate': toDate,
+            'rqFromAmount': '',
+            'rqToAmount': '',
+            'rqTrans.toaccount.nbrAccount': '',
+            'g-recaptcha-response': reCaptcha_response,
+            'rqTrans.page.pageNo': '1',
+            'rsTrans.totalPages': '0',
+            'reporttype': '',
+            'flgAction': 'find',
+            'ipify':'',
+            '_ls': '1',
+            '_ss': '1',
+            'data_cId': str(data_cId)
+            }
+            files=[
 
-        ]
-        headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'max-age=0',
-        'Connection': 'keep-alive',
-        'Origin': 'https://ebanking.vietabank.com.vn',
-        'Referer': url,
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0',
-        'sec-ch-ua': '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"'
-        }
-        response = self.session.post(url, headers=headers, data=payload,files=files)
-        # with open('output.html', 'w', encoding='utf-8') as html_file:
-        #     html_file.write(response.text)
-        transactions =  json.loads(self.extract_transaction(response.text))
-        return {'code':200,'success': True, 'message': 'Thành công',
-                'data':{
-                    'transactions':transactions,
-        }}
+            ]
+            headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            'Origin': 'https://ebanking.vietabank.com.vn',
+            'Referer': url,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0',
+            'sec-ch-ua': '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+            }
+            response = self.session.post(url, headers=headers, data=payload,files=files)
+            # with open('output.html', 'w', encoding='utf-8') as html_file:
+            #     html_file.write(response.text)
+            transactions =  json.loads(self.extract_transaction(response.text))
+            return {'code':200,'success': True, 'message': 'Thành công',
+                    'data':{
+                        'transactions':transactions,
+            }}
+        else:
+            data_cId = self.extract_data_cId(response.text)
+            payload = {
+            'refid': '',
+            'rqTrans.account.nbrAccount': str(account_number),
+            'rqTrans.searchBy': '1',
+            'rqTrans.searchTxnType': '0',
+            'rqFromDate': fromDate,
+            'rqToDate': toDate,
+            'rqFromAmount': '',
+            'rqToAmount': '',
+            'rqTrans.toaccount.nbrAccount': '',
+            # 'g-recaptcha-response': reCaptcha_response,
+            'rqTrans.page.pageNo': '1',
+            'rsTrans.totalPages': '0',
+            'reporttype': '',
+            'flgAction': 'find',
+            'ipify':'',
+            '_ls': '1',
+            '_ss': '1',
+            'data_cId': str(data_cId)
+            }
+            files=[
+
+            ]
+            headers = {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            'Origin': 'https://ebanking.vietabank.com.vn',
+            'Referer': url,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0',
+            'sec-ch-ua': '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+            }
+            response = self.session.post(url, headers=headers, data=payload,files=files)
+            # with open('output.html', 'w', encoding='utf-8') as html_file:
+            #     html_file.write(response.text)
+            transactions =  json.loads(self.extract_transaction(response.text))
+            return {'code':200,'success': True, 'message': 'Thành công',
+                    'data':{
+                        'transactions':transactions,
+            }}
     def mapping_bank_code(self,bank_name):
         with open('banks.json','r', encoding='utf-8') as f:
             data = json.load(f)
@@ -436,17 +487,17 @@ vietabank = VietaBank(username,password,account_number)
 # toDate = '30/03/2024'
 # account_number = "00509294"
 
-# session_raw = vietabank.login()
-# print(session_raw)
+session_raw = vietabank.login()
+print(session_raw)
 
 # accounts_list = vietabank.get_accounts_list()
 # print(accounts_list)
 
-# balance = vietabank.get_balance(account_number)
-# print(balance)
+balance = vietabank.get_balance(account_number)
+print(balance)
 
-# history = vietabank.get_transactions(account_number,fromDate,toDate)
-# print(history)
+history = vietabank.get_transactions(account_number,fromDate,toDate)
+print(history)
 
-# bank_name = vietabank.get_bank_name("0621000456871", "Vietcombank")
-# print(bank_name)
+bank_name = vietabank.get_bank_name("0621000456871", "Vietcombank")
+print(bank_name)
