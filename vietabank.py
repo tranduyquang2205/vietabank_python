@@ -87,7 +87,7 @@ class VietaBank:
     def extract_transaction(self,html_content):
         pattern = r'var transHis = (.*)];'
         match = re.search(pattern, html_content)
-        return match.group(1)+']' if match else []
+        return match.group(1)+']' if match else '[]'
     def extract_account_name(self,html_content):
         pattern = r'<input id="flddestaccountname" name="rqBene\.beneficiaryDTO\[0\]\.paymentTemplateDTO\[0\]\.domesticImReqDataDTO\.destAccount\.accountDesc" class="form-control eng" title="T&ecirc;n chủ thẻ" data-toggle="tooltip" data-placement="top" readonly="readonly" type="text" value="(([A-Z]|\s)*)"/>'
         match = re.search(pattern, html_content)
@@ -315,7 +315,7 @@ class VietaBank:
             }
             response = self.session.post(url, headers=headers, data=payload,files=files)
             # with open('output.html', 'w', encoding='utf-8') as html_file:
-            #     html_file.write(response.text)
+            #     html_file.write(response.text)            
             transactions =  json.loads(self.extract_transaction(response.text))
             return {'code':200,'success': True, 'message': 'Thành công',
                     'data':{
