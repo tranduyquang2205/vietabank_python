@@ -474,13 +474,13 @@ class VietaBank:
 
     
 
-username = "0328656240"
-password = "Phau147@"
-fromDate='10/05/2024'
-toDate = '12/05/2024'
-account_number = "00553597"
+# username = "0328656240"
+# password = "Phau147@"
+# fromDate='10/05/2024'
+# toDate = '12/05/2024'
+# account_number = "00553597"
 
-vietabank = VietaBank(username,password,account_number)
+# vietabank = VietaBank(username,password,account_number)
 
 # username = "0362245196"
 # password = "Nguyen157#"
@@ -497,8 +497,8 @@ vietabank = VietaBank(username,password,account_number)
 # balance = vietabank.get_balance(account_number)
 # print(balance)
 
-history = vietabank.get_transactions(account_number,fromDate,toDate)
-print(history)
+# history = vietabank.get_transactions(account_number,fromDate,toDate)
+# print(history)
 
 # bank_name = vietabank.get_bank_name("0621000456871", "Vietcombank")
 # print(bank_name)
