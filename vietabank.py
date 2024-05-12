@@ -315,8 +315,8 @@ class VietaBank:
             'sec-ch-ua-platform': '"Windows"'
             }
             response = self.session.post(url, headers=headers, data=payload,files=files)
-            with open('output.html', 'w', encoding='utf-8') as html_file:
-                html_file.write(response.text)            
+            # with open('output.html', 'w', encoding='utf-8') as html_file:
+            #     html_file.write(response.text)            
             transactions =  json.loads(self.extract_transaction(response.text))
             return {'code':200,'success': True, 'message': 'Thành công',
                     'data':{
