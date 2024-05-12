@@ -25,7 +25,8 @@ def capsolver(site_key):
         "task": {
             "type": 'ReCaptchaV3TaskProxyLess',
             "websiteKey": site_key,
-            "websiteURL": site_url
+            "websiteURL": site_url,
+            "minScore": 0.7
         }
     }
     res = requests.post("https://api.capsolver.com/createTask", json=payload)
@@ -272,7 +273,7 @@ class VietaBank:
             if not reCaptcha_response:
                 return   {"success": False,"code": 406,"message": "Error bypass reCaptchaV3!"}
             data_cId = self.extract_data_cId(response.text)
-            
+            print(reCaptcha_response)
             payload = {
             'refid': '',
             'rqTrans.account.nbrAccount': str(account_number),
@@ -314,8 +315,8 @@ class VietaBank:
             'sec-ch-ua-platform': '"Windows"'
             }
             response = self.session.post(url, headers=headers, data=payload,files=files)
-            # with open('output.html', 'w', encoding='utf-8') as html_file:
-            #     html_file.write(response.text)            
+            with open('output.html', 'w', encoding='utf-8') as html_file:
+                html_file.write(response.text)            
             transactions =  json.loads(self.extract_transaction(response.text))
             return {'code':200,'success': True, 'message': 'Thành công',
                     'data':{
@@ -473,13 +474,13 @@ class VietaBank:
 
     
 
-# username = "0332570526"
-# password = "Hson6969#"
-# fromDate='02/05/2024'
-# toDate = '03/05/2024'
-# account_number = "00340337"
+username = "0328656240"
+password = "Phau147@"
+fromDate='10/05/2024'
+toDate = '12/05/2024'
+account_number = "00553597"
 
-# vietabank = VietaBank(username,password,account_number)
+vietabank = VietaBank(username,password,account_number)
 
 # username = "0362245196"
 # password = "Nguyen157#"
@@ -496,8 +497,8 @@ class VietaBank:
 # balance = vietabank.get_balance(account_number)
 # print(balance)
 
-# history = vietabank.get_transactions(account_number,fromDate,toDate)
-# print(history)
+history = vietabank.get_transactions(account_number,fromDate,toDate)
+print(history)
 
 # bank_name = vietabank.get_bank_name("0621000456871", "Vietcombank")
 # print(bank_name)
